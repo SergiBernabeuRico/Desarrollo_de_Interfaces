@@ -1,0 +1,39 @@
+/* Hoja de estilos básica para la Actividad 5 UD2 */
+
+/* Estilo general de la ventana principal */
+QMainWindow {
+    background-color: #f0f0f0;
+}
+
+/* Botones en diálogos y mensajes */
+QPushButton {
+    background-color: #2e86c1;
+    color: white;
+    border-radius: 4px;
+    padding: 4px 8px;
+}
+
+QPushButton:hover {
+    background-color: #1b4f72;
+}
+
+/* Dock lateral donde mostramos la última acción */
+QDockWidget {
+    background-color: #ffffff;
+    border: 1px solid #aaaaaa;
+}
+
+/* Barra de estado inferior */
+QStatusBar {
+    background-color: #dcdcdc;
+}
+
+/* Diálogos personalizados (por ejemplo, ContactoDialogo) */
+QDialog {
+    background-color: #ffffff;
+}
+
+/* Mensajes de información/aviso (QMessageBox) */
+QMessageBox {
+    background-color: #ffffff;
+}
