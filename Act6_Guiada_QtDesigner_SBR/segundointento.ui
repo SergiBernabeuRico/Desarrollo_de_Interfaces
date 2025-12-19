@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Form</class>
+ <widget class="QWidget" name="Form">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>300</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">/* ===== Ventana y widgets generales ===== */
+QMainWindow, QWidget {
+    background-color: #2b2b2b;
+    color: #f2f2f2;
+    font-size: 12px;
+}
+
+/* ===== Label ===== */
+QLabel {
+    color: #f2f2f2;
+    margin-top: 6px;
+    margin-bottom: 2px;
+}
+
+/* ===== LineEdit ===== */
+QLineEdit {
+    background-color: #1f1f1f;
+    color: #f2f2f2;
+    border: 1px solid #4a4a4a;
+    border-radius: 3px;
+    padding: 4px 6px;
+    selection-background-color: #f4b400;
+    selection-color: #111111;
+}
+
+QLineEdit:focus {
+    border: 1px solid #f4b400;
+}
+
+/* ===== Botón Enviar ===== */
+QPushButton {
+    background-color: #f4b400;
+    color: #111111;
+    border: 1px solid #d69c00;
+    border-radius: 3px;
+    padding: 6px 10px;
+    font-weight: bold;
+}
+
+QPushButton:hover {
+    background-color: #ffcc33;
+    border: 1px solid #e0a800;
+}
+
+QPushButton:pressed {
+    background-color: #d69c00;
+    border: 1px solid #b88400;
+}
+
+/* ===== Menú superior ===== */
+QMenuBar {
+    background-color: #1e1e1e;
+    color: #f2f2f2;
+}
+
+QMenuBar::item {
+    background: transparent;
+    padding: 4px 10px;
+}
+
+QMenuBar::item:selected {
+    background-color: #333333;
+}
+
+/* ===== Menú desplegable ===== */
+QMenu {
+    background-color: #1e1e1e;
+    color: #f2f2f2;
+    border: 1px solid #444444;
+}
+
+QMenu::item {
+    padding: 6px 18px;
+}
+
+QMenu::item:selected {
+    background-color: #f4b400;
+    color: #111111;
+}
+
+/* ===== Barra de estado ===== */
+QStatusBar {
+    background-color: #1e1e1e;
+    color: #f2f2f2;
+}
+
+QStatusBar::item {
+    border: none;
+}
+</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QLabel" name="label">
+     <property name="text">
+      <string>Soy una subventana</string>
+     </property>
+     <property name="scaledContents">
+      <bool>false</bool>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignmentFlag::AlignCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QPushButton" name="pushButton">
+     <property name="text">
+      <string>Cerrar</string>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
