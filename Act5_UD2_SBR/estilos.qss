@@ -1,39 +1,122 @@
-/* Hoja de estilos básica para la Actividad 5 UD2 */
+/* Estilos QSS suaves, con tono un poco más subido */
 
-/* Estilo general de la ventana principal */
+/* Ventana principal */
 QMainWindow {
-    background-color: #f0f0f0;
+    background: #e9eef6;   /* un poco más azulada */
+    color: #1f2937;
 }
 
-/* Botones en diálogos y mensajes */
-QPushButton {
-    background-color: #2e86c1;
-    color: white;
-    border-radius: 4px;
-    padding: 4px 8px;
+/* Barra de menús */
+QMenuBar {
+    background: #ffffff;
+    color: #1f2937;
+    padding: 5px;
+    border-bottom: 1px solid #c4cfdd;
+}
+QMenuBar::item:selected {
+    background: #d6e6ff;   /* más marcado */
 }
 
-QPushButton:hover {
-    background-color: #1b4f72;
+/* Menús desplegables */
+QMenu {
+    background: #ffffff;
+    color: #1f2937;
+    border: 1px solid #c4cfdd;
+}
+QMenu::item:selected {
+    background: #d6e6ff;
 }
 
-/* Dock lateral donde mostramos la última acción */
-QDockWidget {
-    background-color: #ffffff;
-    border: 1px solid #aaaaaa;
+/* Toolbar */
+QToolBar {
+    background: #ffffff;
+    border-bottom: 1px solid #c4cfdd;
+    spacing: 10px;
+    padding: 7px;
+}
+QToolButton {
+    background: #eef4ff;            /* más azul */
+    border: 1px solid #b6c8e6;      /* borde más visible */
+    border-radius: 7px;
+    padding: 7px;
+}
+QToolButton:hover {
+    background: #d6e6ff;            /* hover más marcado */
+    border-color: #8fb2ff;
+}
+QToolButton:pressed {
+    background: #c2dbff;
 }
 
-/* Barra de estado inferior */
+/* Lista de contactos */
+QListWidget {
+    background: #ffffff;
+    color: #1f2937;
+    border: 2px solid #8fb2ff;      /* borde azul evidente pero suave */
+    border-radius: 12px;
+    font-size: 14px;
+    padding: 7px;
+}
+QListWidget::item {
+    padding: 9px;
+    margin: 3px;
+    border-radius: 7px;
+}
+QListWidget::item:selected {
+    background: #cfe2ff;            /* selección más intensa */
+    color: #1f2937;
+}
+
+/* Barra de estado */
 QStatusBar {
-    background-color: #dcdcdc;
+    background: #ffffff;
+    color: #1f2937;
+    border-top: 1px solid #c4cfdd;
 }
 
-/* Diálogos personalizados (por ejemplo, ContactoDialogo) */
+/* Dock */
+QDockWidget::title {
+    background: #eef4ff;            /* título con tono */
+    color: #1f2937;
+    padding: 7px;
+    border-bottom: 1px solid #c4cfdd;
+}
+QDockWidget QWidget {
+    background: #ffffff;
+    color: #1f2937;
+    padding: 9px;
+}
+
+/* Diálogos */
 QDialog {
-    background-color: #ffffff;
+    background: #ffffff;
+    color: #1f2937;
 }
 
-/* Mensajes de información/aviso (QMessageBox) */
-QMessageBox {
-    background-color: #ffffff;
+/* Inputs */
+QLineEdit {
+    background: #ffffff;
+    color: #1f2937;
+    border: 1px solid #9bb8e9;      /* más marcado */
+    border-radius: 7px;
+    padding: 7px;
+}
+QLineEdit:focus {
+    border: 2px solid #6ea3ff;      /* foco más visible */
+}
+
+/* Botones */
+QDialog QPushButton {
+    background: #eef4ff;
+    color: #1f2937;
+    border: 1px solid #b6c8e6;
+    border-radius: 9px;
+    padding: 9px 16px;
+}
+QDialog QPushButton:hover {
+    background: #d6e6ff;
+    border-color: #8fb2ff;
+}
+QDialog QPushButton:pressed {
+    background: #c2dbff;
 }
