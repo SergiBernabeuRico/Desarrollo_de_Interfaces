@@ -8,7 +8,7 @@ from pathlib import Path  # Para rutas absolutas
 # Widgets principales 
 from PySide6.QtWidgets import (
     QApplication, QMainWindow, QListWidget, QStatusBar, QToolBar, QDockWidget,
-    QLabel, QMessageBox, QInputDialog, QDialog, QFormLayout, QLineEdit, QDialogButtonBox
+    QLabel, QMessageBox, QInputDialog, QDialog, QFormLayout, QTableView, QLineEdit, QDialogButtonBox
 )
 from PySide6.QtGui import (QAction, QIcon)  # Acciones reutilizables en menú/toolbar
 from PySide6.QtCore import Qt  # Para ubicar el dock
@@ -88,7 +88,6 @@ class MainWindow(QMainWindow):
 
         # Estructura de datos simple en memoria: lista de diccionarios
         self.contactos = []
-        self.siguiente_id = 1  # Generador de IDs incremental
 
         # Construimos UI por partes
         self.construir_visor()
@@ -106,9 +105,23 @@ class MainWindow(QMainWindow):
 
         # Creamos/Conectamos la base de datos 
         self.conectar_bd()
-        # Creamos la tabla si aún no existe
-        self.creamos_tabla_si_no_existe()
 
+        # Creamos la tabla si aún no existe
+        self.creamos_tabla_si_no_existe() 
+
+        self.configurar_modelo_y_tabla()
+        self.conectar_seleccion_de_fila()
+
+        # Función para cargar los contactos en QListWidget y que se muestren al iniciar el programa
+        self.cargar_contactos_desde_bd()
+
+        # Al finalizar actualizamos
+        self.actualizar_lista()
+        self.actualizar_estado()
+
+
+    # Al realizar la Act8 el QListWidget ha sido sustituído por QTableView
+    # (el programa ya no muestra el ListWidget)
     def construir_visor(self):
         """Crea el QListWidget central para visualizar contactos."""
         # ListWidget: lista como widget central
@@ -240,32 +253,117 @@ class MainWindow(QMainWindow):
         )
         self.lbl_dock.setText(texto)
 
+    def configurar_modelo_y_tabla(self):
+        """
+        Crea un modelo QSqlTableModel vinculado a la tabla 'contactos'
+        y la QTableView para mostrar los datos
+        """
+        self.modelo = QSqlTableModel(self, self.db)
+        self.modelo.setTable("contactos")
+
+        # Estrategia OnFieldChange:
+        # cualquier cambio en la celda se guarda directamente en la BD
+        self.modelo.setEditStrategy(QSqlTableModel.OnFieldChange)
+        
+        # Ejecuta una consulta SELECT para cargar los datos de la tabla personasen el modelo
+        self.modelo.select()
+
+        # Nombres para las columnas
+        self.modelo.setHeaderData(1, Qt.Horizontal, "Nombre")
+        self.modelo.setHeaderData(2, Qt.Horizontal, "Tlfn")
+        self.modelo.setHeaderData(3, Qt.Horizontal, "Email")
+
+        # Creamos la vista de tabla
+        self.tabla = QTableView()
+        self.tabla.setModel(self.modelo)
+
+        # Ocultar la columna ID (columna 0)
+        self.tabla.setColumnHidden(0, True)
+
+        # Ajustar el tamaño de las columnas
+        self.tabla.resizeColumnsToContents()
+
+        # Añadimos la tabla al centro
+        self.setCentralWidget(self.tabla)
+
+    def conectar_seleccion_de_fila(self):
+        """
+        Conecta la señal de cambio de fila seleccionada.
+        Cuando el usuario selecciona una fila en la tabla,
+        leemos sus datos y los mostramos (por consola y en la barra de estado)
+        """
+        sel_modelo = self.tabla.selectionModel() # Emite señales cuando cambia la selección de la tabla
+        sel_modelo.currentRowChanged.connect(self.fila_seleccionada_cambia) # emite señal cuando cambia la fila seleccionada
+        # envía la fila actual seleccionada y la anterior seleccionada (current,previous)
+
+    def fila_seleccionada_cambia(self, current, previous):
+        """
+        current = nueva fila seleccionada
+        previous = fila seleccionada anterior
+        Leemos los datos de la fila actual del modelo y los mostramos
+        """
+        if not current.isValid():
+            print("Sin selección")
+            return
+        
+        fila = current.row()
+
+        # Leemos directamente del modelo base (self.modelo)
+        # no de la vista (self.tabla), porque la vista puede tener filtros o
+        # estar ordenada de fora diferente. Por eso usamos current.row()
+        # para obtener la fila correcta en el modelo base
+        idx_nombre = self.modelo.index(fila, 1) # columna 'nombre'
+        idx_telefono = self.modelo.index(fila, 2) # columna 'telefono'
+        idx_email = self.modelo.index(fila, 3) # columna 'email'
+
+        nom = self.modelo.data(idx_nombre)
+        tlf = self.modelo.data(idx_telefono)
+        mail = self.modelo.data(idx_email)
+
+        print("Fila seleccionada:")
+        print("- Nombre  :", nom)
+        print("- Teléfono:", tlf)
+        print("- Email   :", mail)
+
+        # Mostramos en StatusBar la fila seleccionada
+        self.statusBar().showMessage(f"Selección: {nom} ({mail})")
+
+
     def aniadir_contacto(self):
         """Abre el diálogo y añade un contacto si se acepta."""
         # Diálogo propio
         dialogo = DialogoContacto(self)
 
-        # exec() bloquea hasta Aceptar/Cancelar (estilo estándar Qt)
+        # exec() bloquea hasta Aceptar/Cancelar 
         if dialogo.exec():
             nombre, telefono, email = dialogo.datos()
 
-            # Creamos dict simple 
+            # Guardamos en la base de datos mediante insertar_contacto_bd
+            nuevo_id = self.insertar_contacto_bd(nombre, telefono, email) # Función que inserta el contacto en la BD
+            if nuevo_id == -1:
+                return # Si falla no se añade a la memoria
+            self.modelo.select() # Actualizamos la tabla
+            
+            # Guardamos en memoria para mostrarlo
             contacto = {
-                "id": self.siguiente_id,
+                "id": int(nuevo_id),
                 "nombre": nombre,
                 "telefono": telefono,
                 "email": email,
             }
-
-            # Guardamos en memoria y avanzamos el ID
-            self.contactos.append(contacto)
-            self.siguiente_id += 1
-
+            self.contactos.append(contacto) 
+            
             # Refrescamos vista + estado + dock
             self.actualizar_lista()
             self.actualizar_estado()
             self.actualizar_dock("Añadir", contacto)
 
+
+    # La configuración de la tabla, oculta el ID, hecho que oculta el parámetro necesitado
+    # para eliminar un contacto de la BD. En un principio pensé que era buena idea, modificar
+    # el método eliminar_contacto(), para que tomara el número de fila de tabla para eliminar
+    # el contacto. Posteriormente he pensado dejar ID como parámetro de borrado, haciendo 
+    # necesario el acceso a la base de datos para poder borrar un contacto.
     def eliminar_contacto(self):
         """Pide un ID y elimina si existe (con confirmación)."""
         # Si no hay contactos, avisamos y salimos
@@ -310,6 +408,11 @@ class MainWindow(QMainWindow):
         # Si no se confirma, salimos
         if resp != QMessageBox.Yes:
             return
+        
+        # Si se confirma, borramos en BD
+        if not self.borrar_contacto_bd(encontrado["id"]): # Función que elimina el contacto de la BD
+            return # si falla, no tocamos el contacto
+        self.modelo.select() # Actualizamos la tabla
 
         # Eliminamos de la lista en memoria
         self.contactos.remove(encontrado)
@@ -368,6 +471,57 @@ class MainWindow(QMainWindow):
             )
             """
         )
+    
+    def insertar_contacto_bd(self, nombre:str, telefono:str, email:str) -> int:
+        """
+        Inserta un contacto en la base de datos y devuelve el id generado (AUTOINCREMENT)
+        """
+        q = QSqlQuery()
+        q.prepare("""
+            INSERT INTO contactos (nombre, telefono, email)
+            VALUES (?, ?, ?)
+        """)
+        q.addBindValue(nombre)
+        q.addBindValue(telefono)
+        q.addBindValue(email)
+
+        if not q.exec():
+            QMessageBox.critical(self, "Error", "No se pudo insertar en BD:\n" + q.lastError().text())
+            return -1
+        
+        # Devuelve el ID generado
+        return q.lastInsertId()
+    
+    def cargar_contactos_desde_bd(self):
+        self.contactos.clear() # Vacía la lista dde memoria para volver a llenarla con los datos de la bd
+
+        q = QSqlQuery() # Crea una consulta a la db
+        if not q.exec("SELECT id, nombre, telefono, email FROM contactos ORDER BY id"):
+            QMessageBox.critical(self, "Error", "No se pudo leer la BD:\n" + q.lastError().text())
+            return
+
+        while q.next(): # Recorre cada fila devuelta por el SELECT y la añade a self.contactos para mostrarla en el QListWidget
+            self.contactos.append({
+                "id": int(q.value(0)),
+                "nombre": str(q.value(1)),
+                "telefono": str(q.value(2) or ""),
+                "email": str(q.value(3)),
+            })
+
+    def borrar_contacto_bd(self, id_contacto:int) -> bool:
+        """
+        Borrar en la BD el contacto mediante el id. Devuelve True si se borró
+        """
+        q = QSqlQuery()
+        q.prepare("DELETE FROM contactos WHERE id = ?")
+        q.addBindValue(id_contacto)
+
+        if not q.exec():
+            QMessageBox.critical(self,  "Error", "No se pudo borrar en BD:\n" + q.lastError().text())
+            return False
+        
+        return True
+
 
 if __name__ == "__main__":
     # Punto de entrada típico de Qt: QApplication -> ventana -> show -> exec()
